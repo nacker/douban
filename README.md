@@ -4,8 +4,22 @@ python抓取豆瓣电影Top250数据并写入Excel
 ## 1.将目标网站上的页面抓取下来
 ## 2.将抓取下来的数据根据一定的规则进行提取
 
+```mysql
+create table `tb_movie`(
+    id int(11) primary key auto_increment,
+    title varchar(255),
+    score varchar(255),
+    date varchar(255),
+    region varchar(255),
+    category varchar(255),
+    directorAndActor varchar(255),
+    quote varchar(255),
+    thumbnail varchar(255)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
 
 ```python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Author  : nacker 648959@qq.com
 # @Time    : 2020/3/4 6:25 下午
@@ -29,9 +43,6 @@ headers = {
 def get_page_source(url):
     '''
     获取网页源代码
-    # response = requests.get(url, headers=headers)
-    # text = response.text
-    # html = etree.HTML(text)
     '''
     try:
         response = requests.get(url, headers=headers)
@@ -42,6 +53,9 @@ def get_page_source(url):
         return None
 
 def get_movie_info(html):
+    '''
+    获取其中一页的数据
+    '''
     if len(html):
         movies = []
         # item节点
@@ -93,8 +107,10 @@ def get_movie_info(html):
             movies.append(movie)
         return movies
 
-
-def writemovie(list):
+def write_movie(list):
+    '''
+    写入数据到数据库
+    '''
     for dict in list:
         sql = 'insert into tb_movie(title,score,date,region,category,directorAndActor,quote,thumbnail) values(%s,%s,%s,%s,%s,%s,%s,%s)'
         mysqlHelper = MysqlHelper('localhost', 3306, 'douban', 'root', '123456')
@@ -107,8 +123,10 @@ def writemovie(list):
         else:
             print('--------------------error--------------------')
 
-# 将相关数据写入excel中
-def saveToExcel(datalist):
+def save_excel(datalist):
+    '''
+    将相关数据写入excel中
+    '''
     # 初始化Excel
     w = xlwt.Workbook()
     style = xlwt.XFStyle()  # 初始化样式
@@ -134,7 +152,10 @@ def saveToExcel(datalist):
     path = '豆瓣电影Top250.xls'
     w.save(path)
 
-def saveToMysql():
+def start_robot():
+    '''
+    开始爬虫
+    '''
     # https: // movie.douban.com / top250?start = 0 & filter =
     for offset in range(0, 250, 25):
         url = 'https://movie.douban.com/top250?start=' + str(offset) +'&filter='
@@ -142,12 +163,13 @@ def saveToMysql():
         # 获取单页数据
         list = get_movie_info(item)
         # 写数据到数据库
-        writemovie(list)
+        write_movie(list)
+        # 家里网络不好,休眠一会吧,省的被K了
         time.sleep(3)
     else:
         print('豆瓣top250的电影信息写入完毕')
 
-def readMysqlData():
+def read_mysql_Data():
     sql = 'select * from tb_movie order by id asc'
     mysqlHelper = MysqlHelper('localhost', 3306, 'douban', 'root', '123456')
     datalist = mysqlHelper.get_all(sql)
@@ -155,13 +177,14 @@ def readMysqlData():
 
 def main():
     # 保存到数据库
-    # saveToMysql()
+    # start_robot()
     # 读取数据
-    datalist = readMysqlData()
+    datalist = read_mysql_Data()
     # 写入Excel
-    saveToExcel(datalist)
+    save_excel(datalist)
 
 if __name__ == '__main__':
     main()
-
 ```
+
+github [源码下载](https://github.com/nacker/douban "douban")

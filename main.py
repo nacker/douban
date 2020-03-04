@@ -22,9 +22,6 @@ headers = {
 def get_page_source(url):
     '''
     获取网页源代码
-    # response = requests.get(url, headers=headers)
-    # text = response.text
-    # html = etree.HTML(text)
     '''
     try:
         response = requests.get(url, headers=headers)
@@ -35,6 +32,9 @@ def get_page_source(url):
         return None
 
 def get_movie_info(html):
+    '''
+    获取其中一页的数据
+    '''
     if len(html):
         movies = []
         # item节点
@@ -86,8 +86,10 @@ def get_movie_info(html):
             movies.append(movie)
         return movies
 
-
-def writemovie(list):
+def write_movie(list):
+    '''
+    写入数据到数据库
+    '''
     for dict in list:
         sql = 'insert into tb_movie(title,score,date,region,category,directorAndActor,quote,thumbnail) values(%s,%s,%s,%s,%s,%s,%s,%s)'
         mysqlHelper = MysqlHelper('localhost', 3306, 'douban', 'root', '123456')
@@ -100,8 +102,10 @@ def writemovie(list):
         else:
             print('--------------------error--------------------')
 
-# 将相关数据写入excel中
-def saveToExcel(datalist):
+def save_excel(datalist):
+    '''
+    将相关数据写入excel中
+    '''
     # 初始化Excel
     w = xlwt.Workbook()
     style = xlwt.XFStyle()  # 初始化样式
@@ -127,7 +131,10 @@ def saveToExcel(datalist):
     path = '豆瓣电影Top250.xls'
     w.save(path)
 
-def saveToMysql():
+def start_robot():
+    '''
+    开始爬虫
+    '''
     # https: // movie.douban.com / top250?start = 0 & filter =
     for offset in range(0, 250, 25):
         url = 'https://movie.douban.com/top250?start=' + str(offset) +'&filter='
@@ -135,12 +142,13 @@ def saveToMysql():
         # 获取单页数据
         list = get_movie_info(item)
         # 写数据到数据库
-        writemovie(list)
+        write_movie(list)
+        # 家里网络不好,休眠一会吧,省的被K了
         time.sleep(3)
     else:
         print('豆瓣top250的电影信息写入完毕')
 
-def readMysqlData():
+def read_mysql_Data():
     sql = 'select * from tb_movie order by id asc'
     mysqlHelper = MysqlHelper('localhost', 3306, 'douban', 'root', '123456')
     datalist = mysqlHelper.get_all(sql)
@@ -148,11 +156,11 @@ def readMysqlData():
 
 def main():
     # 保存到数据库
-    # saveToMysql()
+    # start_robot()
     # 读取数据
-    datalist = readMysqlData()
+    datalist = read_mysql_Data()
     # 写入Excel
-    saveToExcel(datalist)
+    save_excel(datalist)
 
 if __name__ == '__main__':
     main()
