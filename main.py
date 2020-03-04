@@ -1,11 +1,4 @@
-# douban
-python抓取豆瓣电影Top250数据并写入Excel
-
-## 1.将目标网站上的页面抓取下来
-## 2.将抓取下来的数据根据一定的规则进行提取
-
-
-```python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Author  : nacker 648959@qq.com
 # @Time    : 2020/3/4 6:25 下午
@@ -163,5 +156,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-```
